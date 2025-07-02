@@ -1,103 +1,69 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ScriptSearcher | Chxrgxr</title>
+  <title>script searcher</title>
   <style>
     body {
-      background: linear-gradient(90deg, rgba(121,121,205,1) 0%, rgba(44,190,219,1) 100%);
-      margin: 0;
-      font-family: sans-serif;
+      background-color: #222;
+      color: #fff;
     }
-
-    .card {
-      border: 1px solid #ccc;
-      border-radius: 5px;
+    input[type="text"] {
       padding: 10px;
-      margin: 10px;
-      background: rgba(0,0,0,0.5);
-      color: white;
+      font-size: 16px;
     }
-
-    .search {
-      background-color: black;
-      color: white;
-      font-size: 20px;
-      width: 200px;
-      height: 20px;
-      margin-top: 100px;
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
     }
-
-    footer {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      text-align: center;
-      font-family: 'Bradley Hand', cursive;
-      font-size: 15px;
-      color: black;
-      background: rgba(255,255,255,0.6);
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      margin-bottom: 10px;
+    }
+    a {
+      color: #00ff00;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
-
 <body>
-  <br><br><br>
-  <center>
-    <h1 style="line-height: 1px;">ScriptSearcher</h1>
-    <h3 style="line-height: 10px;">by chxrgxr</h3>
-
-    <form id="searchForm">
-      <input id="searchInput" name="search" class="search" placeholder="Search..." required />
-      <button type="submit" style="background-color: black; color: white; width: 60px; height: 20px;">Search</button>
-    </form>
-  </center>
-
-  <div id="scripts"></div>
-
-  <footer>full credits to scriptblox's API</footer>
+  <h1>script searcher</h1>
+  <input type="text" id="search-input" placeholder="search for a script...">
+  <button onclick="search()">search</button>
+  <ul id="results"></ul>
 
   <script>
-    document.getElementById("searchForm").addEventListener("submit", function(event) {
-      event.preventDefault();
+    function search() {
+      const input = document.getElementById('search-input');
+      const query = input.value;
+      const results = document.getElementById('results');
+      results.innerHTML = '';
 
-      const searchTerm = document.getElementById("searchInput").value;
-      const apiUrl = "https://scriptblox.com/api/script/search?q=" + encodeURIComponent(searchTerm);
-
-      fetch(apiUrl)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
+      fetch(`https://api.scriptblox.com/v1.0/search?query=${query}`)
+        .then(response => response.json())
         .then(data => {
-          const scriptsDiv = document.getElementById("scripts");
-          scriptsDiv.innerHTML = '';
-
-          if (!data.result || !data.result.scripts) {
-            scriptsDiv.innerHTML = '<p>No results found.</p>';
-            return;
-          }
-
-          data.result.scripts.forEach(script => {
-            const card = document.createElement('div');
-            card.classList.add('card');
-            card.innerHTML = `
-              <h3 class="title">${script.title}</h3>
-              <p class="slug">${script.slug}</p>
-              <p class="description">Views: ${script.views}</p>
-              <p class="key">Key System: <strong>${script.key}</strong></p>
-              <p class="script">Script: <br><strong style="font-size: 10px; color: red;">${script.script}</strong></p>
-            `;
-            scriptsDiv.appendChild(card);
+          data.forEach(item => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = item.url;
+            a.textContent = item.name;
+            li.appendChild(a);
+            results.appendChild(li);
           });
         })
         .catch(error => {
-          console.error('There was a problem with the fetch operation:', error.message);
+          console.error('error:', error);
+          const li = document.createElement('li');
+          li.textContent = 'an error occurred while searching.';
+          results.appendChild(li);
         });
-    });
+    }
   </script>
 </body>
 </html>
